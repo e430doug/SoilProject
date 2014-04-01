@@ -1,0 +1,39 @@
+READ ME
+
+How to modify the Yun for Firmata
+
+1. Replace the inittab with the one in this directory.  Comment out the tty.
+2. Update the pyfirmata code with the following:
+
+On the Arduino:
+
+The top 7 lines set the baud and waits for the U-boot to start on the Linino side to complete.
+void setup() 
+{
+  Serial1.begin(115200); // Set the baud.
+    
+ // Wait for U-boot to finish startup.  Consume all bytes until we are done.
+ do {
+    while (Serial1.available() > 0) {
+    Serial1.read();
+    }
+    
+    
+    delay(1000);
+    } while (Serial1.available()>0);
+    Serial.begin(9600); // For logging.
+    Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
+    Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
+    Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
+    Firmata.attach(REPORT_ANALOG, reportAnalogCallback);
+    Firmata.attach(REPORT_DIGITAL, reportDigitalCallback);
+    Firmata.attach(SET_PIN_MODE, setPinModeCallback);
+    Firmata.attach(START_SYSEX, sysexCallback);
+    Firmata.attach(SYSTEM_RESET, systemResetCallback);
+                                                      
+    Firmata.begin(Serial1);
+    systemResetCallback();  // reset to default config
+    }
+    
+    
+
